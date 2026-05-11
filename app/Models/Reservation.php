@@ -26,8 +26,8 @@ class Reservation extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function paymentMethod(): HasOne{
-        return $this->hasOne(PaymentMethod::class);
+    public function paymentMethod(): BelongsTo{
+        return $this->belongsTo(PaymentMethod::class);
     }
     
     public function schedule(): BelongsTo{
