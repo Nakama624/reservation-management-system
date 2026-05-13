@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import LinkButton from "@/components/LinkButton";
 
 export default function ContactCompletePage() {
     useEffect(() => {
@@ -15,9 +16,12 @@ export default function ContactCompletePage() {
             </h1>
 
             <div className="mt-10">
-                <Link href="/contact/list" className="text-blue-500 underline">
-                    マイページへ
-                </Link>
+                <LinkButton
+                    href="/contact/list"
+                    className="text-blue-500 underline"
+                >
+                    お問合せ一覧へ
+                </LinkButton>
             </div>
         </div>
     );

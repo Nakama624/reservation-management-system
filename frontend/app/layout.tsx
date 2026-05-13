@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Header from "@/components/Header";
+import ToggleMenu from "@/components/ToggleMenu";
 import "./globals.css";
+import Providers from "./providers";
 
 export const metadata: Metadata = {
-    title: "予約管理システム",
+    title: "予約入力システム",
     description: "reservation app",
 };
 
@@ -18,8 +20,11 @@ export default function RootLayout({
             // className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
         >
             <body className="min-h-full flex flex-col">
-                <Header />
-                <main>{children}</main>
+                <Providers>
+                    <Header />
+                    <ToggleMenu />
+                    <main>{children}</main>
+                </Providers>
             </body>
         </html>
     );

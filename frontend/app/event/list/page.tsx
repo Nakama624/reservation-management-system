@@ -1,6 +1,10 @@
-import Image from "next/image";
 import LinkButton from "@/components/LinkButton";
 import EventSearchForm from "@/components/EventSearchForm";
+import Image from "next/image";
+
+// import { getServerSession } from "next-auth";
+// import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+// import { redirect } from "next/navigation";
 
 interface Schedule {
     id: number;
@@ -35,10 +39,24 @@ async function getEvents(keyword = "", date = ""): Promise<Schedule[]> {
     if (keyword) params.set("keyword", keyword);
     if (date) params.set("date", date);
 
+    // const session = await getServerSession(authOptions);
+
+    // if (!session?.accessToken) {
+    //     redirect("/login");
+    // }
+
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/event/list?${params.toString()}`;
     const res = await fetch(url, {
         cache: "no-store",
+        // headers: {
+        //     Accept: "application/json",
+        //     Authorization: `Bearer ${session.accessToken}`,
+        // },
     });
+
+    // if (res.status === 401) {
+    //     redirect("/login");
+    // }
 
     if (!res.ok) {
         throw new Error("イベント一覧の取得に失敗しました");
@@ -99,7 +117,7 @@ export default async function EventListPage({ searchParams }: Props) {
                                 <td className="w-32 h-24">
                                     <div className="flex items-center justify-center w-full h-full">
                                         <Image
-                                            src={`/event-images/${currentEvent.event.lesson_img1}`}
+                                            src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/event-images/${currentEvent.event.lesson_img1}`}
                                             alt="イベントイメージ"
                                             width={80}
                                             height={48}

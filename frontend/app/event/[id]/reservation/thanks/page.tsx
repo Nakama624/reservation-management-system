@@ -10,7 +10,7 @@ export default function ReservationCompletePage() {
                     href="/reservation/list"
                     className="text-blue-500 underline"
                 >
-                    マイページへ
+                    ご予約一覧へ
                 </Link>
             </div>
         </div>

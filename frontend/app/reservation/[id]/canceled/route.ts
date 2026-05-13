@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 interface Props {
     params: Promise<{
@@ -7,6 +9,12 @@ interface Props {
 }
 
 export async function POST(request: Request, { params }: Props) {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        redirect("/login");
+    }
+
     const { id } = await params;
 
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservation/${id}/canceled`;
@@ -15,6 +23,7 @@ export async function POST(request: Request, { params }: Props) {
         method: "PATCH",
         headers: {
             Accept: "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
         },
     });
 
@@ -22,6 +31,10 @@ export async function POST(request: Request, { params }: Props) {
 
     console.log("cancel status:", res.status);
     console.log("cancel body:", body);
+
+    if (res.status === 401) {
+        redirect("/login");
+    }
 
     if (!res.ok) {
         throw new Error("キャンセルに失敗しました");

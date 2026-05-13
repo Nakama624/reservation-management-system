@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 interface Props {
     params: Promise<{
@@ -7,6 +9,11 @@ interface Props {
 }
 
 export async function POST(request: Request, { params }: Props) {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        redirect("/login");
+    }
     const { id } = await params;
 
     const formData = await request.formData();
@@ -17,15 +24,14 @@ export async function POST(request: Request, { params }: Props) {
         method: "POST",
         headers: {
             Accept: "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
         },
         body: formData,
     });
 
-    const body = await res.text();
-
-    console.log("Laravel保存API URL:", url);
-    console.log("Laravel保存API status:", res.status);
-    console.log("Laravel保存API body:", body);
+    if (res.status === 401) {
+        redirect("/login");
+    }
 
     if (!res.ok) {
         throw new Error("予約の保存に失敗しました");

@@ -2,9 +2,11 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function ContactPage() {
     const router = useRouter();
+    const { data: session } = useSession();
 
     const [title, setTitle] = useState("");
     const [detail, setDetail] = useState("");
@@ -19,8 +21,12 @@ export default function ContactPage() {
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const formData = new FormData();
+        if (!session?.accessToken) {
+            router.push("/login");
+            return;
+        }
 
+        const formData = new FormData();
         formData.append("title", title);
         formData.append("detail", detail);
 
@@ -34,14 +40,27 @@ export default function ContactPage() {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
                 },
                 body: formData,
             },
         );
 
+        if (res.status === 401) {
+            router.push("/login");
+            return;
+        }
+
         if (res.status === 422) {
             const data = await res.json();
             setErrors(data.errors);
+            return;
+        }
+
+        if (!res.ok) {
+            const errorText = await res.text();
+            console.error("confirm error:", res.status, errorText);
+            alert(`確認処理に失敗しました: ${res.status}`);
             return;
         }
 

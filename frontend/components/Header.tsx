@@ -1,7 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 
 export default function Header() {
+    const { data: session, status } = useSession();
+
     return (
         <header
             className="
@@ -24,51 +29,29 @@ export default function Header() {
                     className="w-48 h-auto"
                 />
             </Link>
-            <nav
-                className="
-                flex
-                items-center
-                gap-8
-                font-bold
-                ml-10
-            "
-            >
-                <Link
-                    href="/event/list"
-                    className="hover:text-blue-500 transition"
-                >
-                    イベント一覧
-                </Link>
-                {/* <Link href="/past-events">過去のイベント一覧</Link> */}
-                <Link
-                    href="/reservation/list"
-                    className="hover:text-blue-500 transition"
-                >
-                    予約一覧
-                </Link>
-                <Link
-                    href="/reservation"
-                    className="hover:text-blue-500 transition"
-                >
-                    新規予約
-                </Link>
-                <Link
-                    href="/contact/list"
-                    className="hover:text-blue-500 transition"
-                >
-                    お問合せ
-                </Link>
 
-                {/* <form method="POST" action="{{ route('logout') }}">
-                    @csrf */}
-                <button
-                    type="submit"
-                    className="hover:text-blue-500 transition"
-                >
-                    ログアウト
-                </button>
-                {/* </form> */}
-            </nav>
+            <div>
+                {status === "loading" ? (
+                    <p>Loading...</p>
+                ) : session ? (
+                    <div className="flex items-center space-x-4">
+                        <p>ようこそ, {session.user?.name}さん</p>
+                        <button
+                            onClick={() => signOut({ callbackUrl: "/login" })}
+                            className="item-right font-medium text-black-600 rounded-md hover:bg-red-700"
+                        >
+                            ログアウト
+                        </button>
+                    </div>
+                ) : (
+                    <Link
+                        href="/login"
+                        className="px-4 py-2 font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700"
+                    >
+                        ログイン
+                    </Link>
+                )}
+            </div>
             <div className="ml-auto text-black text-right">
                 <p className="text-2xl font-bold">TEL.0120-123-456</p>
 

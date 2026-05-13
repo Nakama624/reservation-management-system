@@ -12,13 +12,8 @@ class EventController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function eventIndex(Request $request)
+    public function eventList(Request $request)
     {
-        // 未来日付で開催予定があるイベントの場合
-        // $currentEvents = Schedule::with('event')
-        //     ->where('start_at', '>', now())
-        //     ->get();
-
         $keyword = $request->input("keyword");
         $date = $request->input("date");
 
@@ -59,7 +54,6 @@ class EventController extends Controller
         // 【開催日の表示】
         // イベントの全工程を終了した場合は、すべての開催日を表示
         // まだ終了していない場合は、各scheduleの開催日を表示
-
         $schedule = Schedule::with('event.schedules', 'reservations')
             ->findOrFail($schedule_id);
 

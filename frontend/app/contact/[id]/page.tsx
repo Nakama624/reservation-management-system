@@ -1,4 +1,8 @@
 import LinkButton from "@/components/LinkButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
+import Image from "next/image";
 
 type Contact = {
     id: number;
@@ -16,10 +20,24 @@ type Props = {
 };
 
 async function getContactDetail(id: string): Promise<Contact> {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        redirect("/login");
+    }
+
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/contact/${id}`;
     const res = await fetch(url, {
         cache: "no-store",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+        },
     });
+
+    if (res.status === 401) {
+        redirect("/login");
+    }
 
     if (!res.ok) {
         throw new Error("お問い合わせ詳細の取得に失敗しました");
@@ -59,7 +77,7 @@ export default async function ContactDetailPage({ params }: Props) {
                     <div className="flex items-start mb-4">
                         <p className="w-24 pt-2">画像</p>
                         <div className="w-4/5">
-                            <img
+                            <Image
                                 src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${contact.img}`}
                                 className="w-40"
                                 alt="お問い合わせ画像"

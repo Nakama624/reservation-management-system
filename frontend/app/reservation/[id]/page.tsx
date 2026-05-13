@@ -1,4 +1,7 @@
 import LinkButton from "@/components/LinkButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
 interface Reservation {
     id: number;
@@ -32,10 +35,23 @@ type Props = {
 };
 
 async function getReservationDetail(id: string): Promise<Reservation> {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        redirect("/login");
+    }
+
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/reservation/${id}`;
     const res = await fetch(url, {
-        cache: "no-store",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+        },
     });
+
+    if (res.status === 401) {
+        redirect("/login");
+    }
 
     if (!res.ok) {
         throw new Error("予約詳細の取得に失敗しました");

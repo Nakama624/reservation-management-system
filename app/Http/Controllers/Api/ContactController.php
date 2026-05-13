@@ -17,19 +17,30 @@ class ContactController extends Controller
 
     public function contactList(Request $request): JsonResponse
     {
-        // ★
-        // $user = $request->user();
-        $contacts = Contact::all()->map(function ($contact) {
-            return [
-                'id' => $contact->id,
-                'title' => $contact->title,
-                'status' => $contact->status,
-                'created_at' => $contact->created_at->format('Y-m-d H:i'),
-            ];
-        });
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Unauthenticated',
+            ], 401);
+        }
+
+        $contacts = Contact::where('user_id', $user->id)
+            ->latest()
+            ->get()
+            ->map(function ($contact) use ($user) {
+                return [
+                    'id' => $contact->id,
+                    'user_id' => $user->id,
+                    'title' => $contact->title,
+                    'status' => $contact->status,
+                    'created_at' => $contact->created_at->format('Y-m-d H:i'),
+                ];
+            });
+
         return response()->json($contacts);
     }
-
+    
     public function contactDetail($contact_id): JsonResponse{
         $contact = Contact::findOrFail($contact_id);
 
@@ -49,11 +60,10 @@ class ContactController extends Controller
     }
 
     public function complete(Request $request){
-        // $user = auth()->user();
+        $user = auth()->user();
 
         Contact::create([
-            // 'user_id' => $user->id,
-            'user_id' => 1,
+            'user_id' => $user->id,
             'title' => $request->title,
             'detail' => $request->detail,
             'img' => $request->img,

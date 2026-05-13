@@ -10,24 +10,20 @@ use App\Models\Schedule;
 use App\Models\PaymentMethod;
 use App\Http\Requests\ReservationRequest;
 
-
-
 class ReservationController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): JsonResponse
+    public function reservationList(Request $request): JsonResponse
     {
-        // ★
-        // $user = auth()->user();
+        $user = auth()->user();
 
         $keyword = $request->input("keyword");
         $date = $request->input("date");
 
         $reservations = Reservation::query()
-            // ★
-            // ->where('user_id', $user->id)
+            ->where('user_id', $user->id)
             // タイトルまたは講師名で検索
             ->whereHas('schedule.event', function ($query) use ($keyword) {
                 if (!empty($keyword)){
@@ -70,7 +66,6 @@ class ReservationController extends Controller
             ->sum("participants");
 
         $remainingCapacity = $schedule->event->capacity - $totalParticipants;
-        
 
         $paymentMethods = PaymentMethod::all();
 
@@ -102,11 +97,11 @@ class ReservationController extends Controller
 
     // 予約確定
     public function store(Request $request, $schedule_id){
-        // $user = auth()->user();
+        $user = auth()->user();
         $schedule = Schedule::with('event')->findOrFail($schedule_id);
 
         Reservation::create([
-            'user_id' => 1, //★
+            'user_id' => 'user_id', $user->id,
             'schedule_id' => $schedule->id,
             'participants' => $request->participants,
             'amount' => $schedule->event->price * $request->participants,
@@ -122,17 +117,14 @@ class ReservationController extends Controller
     // お支払が未払いの場合のみ一覧からキャンセルが可能
     public function canceled($reservation_id, Request $request){
         $canceledReservation = Reservation::where('id', $reservation_id)
-            // ->where('user_id', $request->user()->id)
-            ->where('user_id', 1)
+            ->where('user_id', $request->user()->id)
             ->firstOrFail();
 
         $canceledReservation->update([
             'is_canceled' => true,
         ]);
 
-        return response()->json([
-            'message' => 'キャンセルしました',
-        ]);
+        return response()->json();
     }
 
 }

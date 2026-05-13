@@ -1,4 +1,7 @@
 import EventReserveForm from "@/components/EventReserveForm";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
 export interface Schedule {
     id: number;
@@ -44,11 +47,24 @@ interface Props {
 }
 
 async function getEventReserve(id: string): Promise<EventReserveResponse> {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        redirect("/login");
+    }
+
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/event/${id}/reservation`;
 
     const res = await fetch(url, {
-        cache: "no-store",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+        },
     });
+
+    if (res.status === 401) {
+        redirect("/login");
+    }
 
     if (!res.ok) {
         throw new Error("予約入力欄が取得できませんでした");

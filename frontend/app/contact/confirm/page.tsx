@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 interface Contact {
     title: string;
@@ -9,15 +11,60 @@ interface Contact {
 }
 
 export default function ContactConfirm() {
-    const [contact, setContact] = useState<Contact | null>(null);
+    const router = useRouter();
+    const { data: session, status } = useSession();
 
-    useEffect(() => {
+    const [contact, setContact] = useState<Contact | null>(() => {
+        if (typeof window === "undefined") {
+            return null;
+        }
+
         const savedContact = sessionStorage.getItem("contact");
 
-        if (savedContact) {
-            setContact(JSON.parse(savedContact));
+        if (!savedContact) {
+            return null;
         }
-    }, []);
+
+        return JSON.parse(savedContact) as Contact;
+    });
+    const handleComplete = async () => {
+        if (status === "loading") {
+            return;
+        }
+
+        if (!session?.accessToken || !contact) {
+            router.push("/login");
+            return;
+        }
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/contact/complete`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: "application/json",
+                    Authorization: `Bearer ${session.accessToken}`,
+                },
+                body: JSON.stringify(contact),
+            },
+        );
+
+        if (res.status === 401) {
+            router.push("/login");
+            return;
+        }
+
+        if (!res.ok) {
+            console.error("complete error:", res.status, await res.text());
+            alert("送信に失敗しました");
+            return;
+        }
+
+        sessionStorage.removeItem("contact");
+
+        router.push("/contact/thanks");
+    };
 
     if (!contact) {
         return <div>お問い合わせ内容がありません</div>;
@@ -29,46 +76,33 @@ export default function ContactConfirm() {
                 お問合せ確認
             </h1>
 
-            <form
-                action="/contact/complete"
-                method="post"
-                className="border p-4"
-            >
+            <div className="border p-4">
                 <div className="flex items-start mb-4">
                     <p className="w-24 pt-2">件名</p>
+
                     <div className="w-4/5">
                         <div className="p-1 w-full">{contact.title}</div>
                     </div>
-
-                    <input type="hidden" name="title" value={contact.title} />
                 </div>
 
                 <div className="flex items-start mb-4">
                     <p className="w-24 pt-2">詳細</p>
+
                     <div className="w-4/5">
                         <div className="p-1 w-full h-32">{contact.detail}</div>
                     </div>
-
-                    <input type="hidden" name="detail" value={contact.detail} />
                 </div>
 
                 <div className="flex items-start mb-4">
                     <p className="w-24 pt-2">画像</p>
+
                     <div className="w-4/5">
                         {contact.img ? (
-                            <>
-                                <img
-                                    src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${contact.img}`}
-                                    className="w-40"
-                                    alt="お問い合わせ画像"
-                                />
-
-                                <input
-                                    type="hidden"
-                                    name="img"
-                                    value={contact.img}
-                                />
-                            </>
+                            <img
+                                src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/${contact.img}`}
+                                className="w-40"
+                                alt="お問い合わせ画像"
+                            />
                         ) : (
                             <p>画像なし</p>
                         )}
@@ -77,13 +111,14 @@ export default function ContactConfirm() {
 
                 <div className="flex justify-center">
                     <button
-                        type="submit"
+                        type="button"
+                        onClick={handleComplete}
                         className="bg-blue-500 text-white px-4 py-2 rounded"
                     >
                         送信する
                     </button>
                 </div>
-            </form>
+            </div>
         </div>
     );
 }

@@ -1,4 +1,7 @@
 import LinkButton from "@/components/LinkButton";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
 interface Contact {
     id: number;
@@ -8,14 +11,27 @@ interface Contact {
 }
 
 async function getContacts(): Promise<Contact[]> {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        redirect("/login");
+    }
+
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/contact/list`;
-    // 後に削除★
-    console.log(`Fetching data from: ${url}`); // デバッグ用にURLをログ出力
 
     const res = await fetch(url, {
-        // SSRではキャッシュが強力に効くため、開発中はキャッシュを無効にする
         cache: "no-store",
+        headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+        },
     });
+
+    console.log("res:", res);
+
+    if (res.status === 401) {
+        redirect("/login");
+    }
 
     if (!res.ok) {
         throw new Error("お問い合わせ一覧の取得に失敗しました");
