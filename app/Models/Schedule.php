@@ -18,6 +18,7 @@ class Schedule extends Model
     // datetime型を成形するため
     protected $casts = [
         'start_at' => 'datetime',
+        'finish_at' => 'datetime',
     ];
 
     public function reservations(): HasMany{

@@ -10,13 +10,13 @@ use App\Models\Contact;
 
 class ContactController extends Controller
 {
-    public function contactList(){
-        $user = auth()->user();
-        $contacts = Contact::where("user_id", $user->id)
-            ->get();
+    // public function contactList(){
+    //     $user = auth()->user();
+    //     $contacts = Contact::where("user_id", $user->id)
+    //         ->get();
 
-        return view("contact-list", compact("contacts"));
-    }
+    //     return view("contact-list", compact("contacts"));
+    // }
 
     public function Destroy($contact_id){
         // ステータスによって削除可否を追加
@@ -24,28 +24,29 @@ class ContactController extends Controller
         return redirect('/contact/list')->with('message', 'Todoを削除しました');
     }
 
-    public function contactDelete($contact_id){
-        $contact = Contact::find($contact_id);
+    // public function contactDetail($contact_id){
+    //     $contact = Contact::find($contact_id);
 
-    }
+    //     return view("contact-detail", compact("contact"));
+    // }
 
     // 新規問合せ
-    public function contact(){
+    // public function contact(){
         
-        return view("contact");
-    }
+    //     return view("contact");
+    // }
 
-    public function confirm(ContactRequest $request){
-        $contact = $request->only([
-            'title',
-            'detail',
-        ]);
-        // 画像を先に保存
-        if ($request->hasFile('img')){
-            $contact['img'] = $request->file('img')->store('contacts', 'public');
-        }
-        return view("contact-confirm", compact("contact"));
-    }
+    // public function confirm(ContactRequest $request){
+    //     $contact = $request->only([
+    //         'title',
+    //         'detail',
+    //     ]);
+    //     // 画像を先に保存
+    //     if ($request->hasFile('img')){
+    //         $contact['img'] = $request->file('img')->store('contacts', 'public');
+    //     }
+    //     return view("contact-confirm", compact("contact"));
+    // }
 
     public function complete(Request $request){
         $user = auth()->user();

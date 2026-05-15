@@ -53,5 +53,6 @@ class ScheduleSeeder extends Seeder
             'start_at' => '2026-06-20 10:00:00',
             'finish_at' => '2026-06-20 11:00:00',
         ]);
+        Schedule::factory()->count(100)->create();
     }
 }

@@ -16,6 +16,7 @@ class ReservationSeeder extends Seeder
         Reservation::create([
             'user_id' => 2,
             'schedule_id' => 2,
+            'contact_number'=> '0123456789',
             'participants' => 2,
             'amount' => 2000,
             'payment_status' => '支払済み',
@@ -27,6 +28,7 @@ class ReservationSeeder extends Seeder
         Reservation::create([
             'user_id' => 2,
             'schedule_id' => 4,
+            'contact_number'=> '0123334444',
             'participants' => 3,
             'amount' => 3000,
             'payment_status' => '未払い',
@@ -37,6 +39,7 @@ class ReservationSeeder extends Seeder
         Reservation::create([
             'user_id' => 2,
             'schedule_id' => 5,
+            'contact_number'=> '0124445555',
             'participants' => 3,
             'amount' => 3000,
             'payment_status' => '未払い',
@@ -47,10 +50,12 @@ class ReservationSeeder extends Seeder
         Reservation::create([
             'user_id' => 5,
             'schedule_id' => 2,
+            'contact_number'=> '0128889999',
             'participants' => 3,
             'amount' => 3000,
             'payment_status' => '未払い',
             'payment_method_id' => 3,
+            'payment_updated_by' => 1,
             'paid_at' => null,
             'is_canceled'=> false,
         ]);
@@ -58,6 +63,7 @@ class ReservationSeeder extends Seeder
         Reservation::create([
             'user_id' => 3,
             'schedule_id' => 4,
+            'contact_number'=> '01200001111',
             'participants' => 2,
             'amount' => 2800,
             'payment_status' => '支払済み',

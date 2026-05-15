@@ -17,25 +17,25 @@ class ContactSeeder extends Seeder
             'user_id' => 2,
             'title' => '予約時間について',
             'detail' => "予約時間について予約時間について予約時間について予約時間について",
-            'status' => "未対応"
+            'status_id' => "1"
         ]);
         Contact::create([
             'user_id' => 2,
             'title' => 'XXXXXXX',
             'detail' => "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            'status' => "対応中"
+            'status_id' => "2"
         ]);
         Contact::create([
             'user_id' => 2,
             'title' => 'AAAAAAAAAAAA対応済みテスト',
             'detail' => "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAあ",
-            'status' => "対応済み"
+            'status_id' => "3"
         ]);
         Contact::create([
             'user_id' => 3,
             'title' => 'AAAAAAAAAAAA',
             'detail' => "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAあ",
-            'status' => "対応済み"
+            'status_id' => "1"
         ]);
     }
 }

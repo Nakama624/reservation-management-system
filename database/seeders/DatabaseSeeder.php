@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             ScheduleSeeder::class,
             PaymentMethodSeeder::class,
             ReservationSeeder::class,
+            ContactStatusSeeder::class,
             ContactSeeder::class,
         ]);
     }

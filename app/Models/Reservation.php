@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 
 class Reservation extends Model
@@ -14,10 +13,12 @@ class Reservation extends Model
     protected $fillable = [
         'user_id',
         'schedule_id',
+        'contact_number',
         'participants',
         'amount',
         'payment_status',
         'payment_method_id',
+        'payment_updated_by',
         'paid_at',
         'is_canceled',
     ];
@@ -26,8 +27,8 @@ class Reservation extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function paymentMethod(): HasOne{
-        return $this->hasOne(PaymentMethod::class);
+    public function paymentMethod(): BelongsTo{
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
     }
     
     public function schedule(): BelongsTo{
