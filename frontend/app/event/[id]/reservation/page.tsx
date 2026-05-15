@@ -1,4 +1,5 @@
-import EventReserveForm from "@/components/EventReserveForm";
+// import EventReserveForm from "@/app/event/[id]/reservation/components/EventReserveForm";
+import EventReserveForm from "./components/EventReserveForm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";

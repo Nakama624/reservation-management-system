@@ -26,6 +26,7 @@ class ContactController extends Controller
         }
 
         $contacts = Contact::where('user_id', $user->id)
+            ->with('contactStatus')
             ->latest()
             ->get()
             ->map(function ($contact) use ($user) {
@@ -33,7 +34,7 @@ class ContactController extends Controller
                     'id' => $contact->id,
                     'user_id' => $user->id,
                     'title' => $contact->title,
-                    'status' => $contact->status,
+                    'status' => $contact->contactStatus->status,
                     'created_at' => $contact->created_at->format('Y-m-d H:i'),
                 ];
             });
@@ -74,35 +75,4 @@ class ContactController extends Controller
     }
 
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 }

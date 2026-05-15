@@ -15,10 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('schedule_id')->constrained()->cascadeOnDelete();
+            $table->string('contact_number');
             $table->unsignedInteger('participants');
             $table->unsignedInteger('amount');
             $table->string('payment_status')->default('未払い');
             $table->foreignId('payment_method_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('payment_updated_by')
+                ->nullable()
+                ->constrained('users')
+                ->cascadeOnDelete();
             $table->dateTime('paid_at')->nullable();
             $table->boolean('is_canceled')->default(false);
             $table->timestamps();

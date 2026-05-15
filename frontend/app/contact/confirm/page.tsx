@@ -71,7 +71,7 @@ export default function ContactConfirm() {
     }
 
     return (
-        <div className="w-[500px] mx-auto mt-20">
+        <div className="mx-auto w-full max-w-5xl px-6 sm:px-8">
             <h1 className="text-3xl mb-4 font-bold text-gray-500 text-center">
                 お問合せ確認
             </h1>

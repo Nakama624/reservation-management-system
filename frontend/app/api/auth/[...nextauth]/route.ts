@@ -10,10 +10,6 @@ export const authOptions: NextAuthOptions = {
                 password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) {
-                    return null;
-                }
-
                 const res = await fetch(
                     `${process.env.LARAVEL_API_URL}/api/login`,
                     {
@@ -23,22 +19,23 @@ export const authOptions: NextAuthOptions = {
                             Accept: "application/json",
                         },
                         body: JSON.stringify({
-                            email: credentials.email,
-                            password: credentials.password,
+                            email: credentials?.email,
+                            password: credentials?.password,
                         }),
                     },
                 );
+
+                const data = await res.json();
 
                 if (!res.ok) {
                     return null;
                 }
 
-                const data = await res.json();
-
                 return {
                     id: String(data.user.id),
                     name: data.user.name,
                     email: data.user.email,
+                    isManager: Boolean(data.user.is_manager),
                     accessToken: data.token,
                 };
             },
@@ -49,6 +46,7 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.accessToken = user.accessToken;
                 token.id = user.id;
+                token.isManager = user.isManager;
             }
 
             return token;
@@ -56,6 +54,7 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             session.accessToken = token.accessToken as string;
             session.user.id = token.id as string;
+            session.user.isManager = token.isManager as boolean;
 
             return session;
         },

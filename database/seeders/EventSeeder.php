@@ -73,5 +73,7 @@ class EventSeeder extends Seeder
             'price' => "1400",
         ]);
 
+        Event::factory()->count(100)->create();
+
     }
 }

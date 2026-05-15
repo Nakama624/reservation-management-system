@@ -1,5 +1,5 @@
 import LinkButton from "@/components/LinkButton";
-import Image from "next/image";
+// import Image from "next/image";
 // import { getServerSession } from "next-auth";
 // import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 // import { redirect } from "next/navigation";
@@ -86,7 +86,7 @@ export default async function EventDetailPage({ params }: Props) {
             </h1>
 
             <div className="w-98 mb-20">
-                <Image
+                <img
                     src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/event-images/${schedule.event.lesson_img1}`}
                     width={400}
                     height={240}

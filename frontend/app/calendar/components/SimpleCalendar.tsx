@@ -17,13 +17,15 @@ export default function SimpleCalendar({ schedules }: Props) {
     };
 
     return (
-        <FullCalendar
-            plugins={[dayGridPlugin]}
-            initialView="dayGridMonth"
-            events={schedules}
-            eventClick={handleEventClick}
-            locale="ja"
-            height="auto"
-        />
+        <div className="mx-auto w-full max-w-5xl px-6 sm:px-8">
+            <FullCalendar
+                plugins={[dayGridPlugin]}
+                initialView="dayGridMonth"
+                events={schedules}
+                eventClick={handleEventClick}
+                locale="ja"
+                height="auto"
+            />
+        </div>
     );
 }

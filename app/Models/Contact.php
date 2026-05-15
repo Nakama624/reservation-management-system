@@ -15,9 +15,14 @@ class Contact extends Model
         'title',
         'detail',
         'img',
-        'status', //未対応、対応中、対応済み
+        'status_id',
     ];
     public function user(): BelongsTo{
         return $this->belongsTo(User::class);
     }
+
+    public function contactStatus(): BelongsTo{
+        return $this->belongsTo(ContactStatus::class, 'status_id');
+    }
+
 }

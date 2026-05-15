@@ -38,59 +38,73 @@ export default async function PastEventListPage() {
     const pastEvents = await getPastEvents();
 
     return (
-        <div className="m-10">
-            <div className="flex justify-between mt-10 mb-4">
+        <div className="mx-auto w-full max-w-5xl px-6 sm:px-8 pb-20">
+            <div className="flex justify-between items-center my-10">
                 <h1 className="text-left text-2xl font-bold text-gray-500">
                     過去のイベント
                 </h1>
             </div>
-
-            <table className="w-full border border-gray-300 border-collapse">
-                <thead>
-                    <tr className="border border-gray-300 h-12 text-lg">
-                        <th></th>
-                        <th>イベント名</th>
-                        <th>講師</th>
-                        <th>金額</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {pastEvents.map((pastEvent) => (
-                        <tr key={pastEvent.id} className="text-center h-12">
-                            <td className="w-32 h-24">
-                                <div className="flex items-center justify-center w-full h-full">
-                                    <Image
-                                        src={`/event-images/${pastEvent.lesson_img1}`}
-                                        alt="イベントイメージ"
-                                        width={80}
-                                        height={48}
-                                        className="
-                                        object-contain
-                                        max-h-20
-                                        w-auto
-                                        hover:scale-[2]
-                                        transition-transform
-                                        duration-300
-                                    "
-                                    />
-                                </div>
-                            </td>
-                            <td>{pastEvent.title}</td>
-                            <td>{pastEvent.instructor_name}</td>
-                            <td>¥{pastEvent.price.toLocaleString()}</td>
-                            <td>
-                                <LinkButton
-                                    href={`/event/${pastEvent.id}`}
-                                    className="bg-blue-500 text-white"
-                                >
-                                    詳細
-                                </LinkButton>
-                            </td>
+            <div className="overflow-x-auto border border-gray-300">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border border-gray-300 bg-gray-300 h-12 text-lg">
+                            <th></th>
+                            <th className="px-4 py-3 whitespace-nowrap">
+                                イベント名
+                            </th>
+                            <th className="px-4 py-3 whitespace-nowrap">
+                                講師
+                            </th>
+                            <th className="px-4 py-3 whitespace-nowrap">
+                                金額
+                            </th>
+                            <th className="px-4 py-3 whitespace-nowrap"></th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {pastEvents.map((pastEvent) => (
+                            <tr
+                                key={pastEvent.id}
+                                className="text-center h-16 border border-gray-300"
+                            >
+                                <td className="w-32 h-24">
+                                    <div className="flex items-center justify-center w-full h-full">
+                                        <Image
+                                            src={`/event-images/${pastEvent.lesson_img1}`}
+                                            alt="イベントイメージ"
+                                            width={80}
+                                            height={48}
+                                            className="
+                                            object-contain
+                                            max-h-20
+                                            w-auto
+                                            hover:scale-[2]
+                                            transition-transform
+                                            duration-300
+                                        "
+                                        />
+                                    </div>
+                                </td>
+                                <td className="px-4">{pastEvent.title}</td>
+                                <td className="px-4">
+                                    {pastEvent.instructor_name}
+                                </td>
+                                <td className="px-4">
+                                    ¥{pastEvent.price.toLocaleString()}
+                                </td>
+                                <td className="px-4">
+                                    <LinkButton
+                                        href={`/event/${pastEvent.id}`}
+                                        className="bg-blue-500 text-white"
+                                    >
+                                        詳細
+                                    </LinkButton>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }

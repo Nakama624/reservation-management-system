@@ -1,4 +1,6 @@
-import SimpleCalendar from "@/components/SimpleCalendar";
+// import SimpleCalendar from "@/app/calendar/components/SimpleCalendar";
+import SimpleCalendar from "./components/SimpleCalendar";
+
 import type { EventInput } from "@fullcalendar/core";
 // import { getServerSession } from "next-auth";
 // import { authOptions } from "@/app/api/auth/[...nextauth]/route";

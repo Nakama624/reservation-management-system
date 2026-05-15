@@ -2,22 +2,26 @@ import "next-auth";
 
 declare module "next-auth" {
     interface Session {
-        accessToken?: string;
+        accessToken: string;
         user: {
-            id?: string;
+            id: string;
             name?: string | null;
             email?: string | null;
+            image?: string | null;
+            isManager: boolean;
         };
     }
 
     interface User {
-        accessToken?: string;
+        accessToken: string;
+        isManager: boolean;
     }
 }
 
 declare module "next-auth/jwt" {
     interface JWT {
-        accessToken?: string;
-        id?: string;
+        accessToken: string;
+        id: string;
+        isManager: boolean;
     }
 }
