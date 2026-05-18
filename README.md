@@ -1,67 +1,226 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Reservation-Management-System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## はじめに
 
-## About Laravel
+### 開発目的
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+イベント予約・決済・管理機能を備えた予約管理システムを開発しました。
+Next.js と Laravel を用いたフロントエンド・バックエンド分離構成を採用し、
+REST API連携、認証機能、Stripe決済、MailPit認証など、
+実務を意識したWebアプリケーション開発を目的として制作しました。
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 想定ユーザー
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| ユーザー     | 機能                                                                                                                                                      | 認証必須 | memo                                                   |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | :------: | ------------------------------------------------------ |
+| 共通         | ログイン、ログアウト、新規登録、メール認証                                                                                                                |    ◯     | 管理者の場合はDBにて直接is_manager=1に設定する必要あり |
+| 管理者       | 予約一覧表示/検索(全ユーザー予約)、イベント毎の予約一覧、決済ステータス変更（未払い時のみ）、お問合せ一覧表示(全ユーザーお問合せ)、お問合せ詳細表示       |    ◯     |                                                        |
+| 一般ユーザー | 予約一覧表示/検索(自身の予約のみ)、予約キャンセル、予約詳細表示 、お問合せ一覧表示、お問合せ詳細表示、お問合せ新規作成/送信、お問合せ削除（未対応時のみ） |    ◯     |                                                        |
+| 全ユーザー   | イベント一覧表示、イベントカレンダー表示、イベント詳細                                                                                                    |          |                                                        |
 
-## Learning Laravel
+## Dockerビルド
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- `git clone git@github.com:Nakama624/reservation-management-system.git`
+- `cd reservation-management-system`
+- `./vendor/bin/sail up -d`
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## バックエンド環境構築
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- `docker-compose exec php bash`
+- `composer install`
+- `cp .env.example .env`、環境変数を変更
+- `sail artisan key:generate`
+- `sail artisan migrate`
+- `sail artisan db:seed`
+- `sail artisan storage:link`
 
-## Laravel Sponsors
+## フロントエンド環境構築
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- `./vendor/bin/sail npm install`
+- `cd frontend`
+- `npm install`
+- `npm run dev`
 
-### Premium Partners
+## mailhog
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### 環境設定
 
-## Contributing
+http://localhost:8025/
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+> `.env` ファイルを以下のように修正。
+>
+> ```diff
+> -　MAIL_FROM_ADDRESS=null
+> +　MAIL_FROM_ADDRESS=no-reply@example.com
+> ```
 
-## Code of Conduct
+## stripe決済
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 環境設定
 
-## Security Vulnerabilities
+> stripe決済のアカウントを作成し、`.env` ファイルに以下のように追加。
+> https://dashboard.stripe.com/login?locale=ja-JP
+>
+> ```diff
+> +　STRIPE_SECRET=（stripe決済各ユーザーアカウントのシークレットキー）
+> +　APP_URL=http://localhost
+> ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 実行テスト１/クレジットカード（VISA/成功）
 
-## License
+- メールアドレス：任意のアドレス
+- カード番号(VISA)：4242424242424242
+- MM/YY：（任意の将来の日付）
+- セキュリティコード：（任意の 3 桁の数字）
+- 名前：任意の名前
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-# reservation-management-system
+### 実行テスト２/コンビニ支払い（振込結果は非同期）
+
+- メールアドレス：任意のアドレス
+- 名前：任意の名前
+
+### テスト詳細
+
+- https://docs.stripe.com/testing
+
+## 単体テスト
+
+### DBを作成
+
+- `docker-compose exec mysql bash`
+- `mysql -u root -p`、パスワード入力
+- `CREATE DATABASE demo_test;`
+- `exit`
+
+### .env.testingを作成
+
+- `docker-compose exec php bash`
+- `cp .env .env.testing`、環境変数を変更
+- `php artisan key:generate --env=testing`
+- `php artisan migrate --env=testing`
+
+### テスト実行
+
+- 1.ｘｘｘｘ：
+  `ｘｘｘｘ`
+- 2.ｘｘｘｘ：
+  `ｘｘｘｘ`
+- 3.ｘｘｘｘ：
+  `ｘｘｘｘ`
+- 4.ｘｘｘｘ：
+  `ｘｘｘｘｘ`
+
+## 使用技術
+
+### フロントエンド
+
+- Next.js：next@16.2.6
+- React：react@19.2.4
+- TypeScript：Version 5.9.3
+
+### バックエンド
+
+- PHP：PHP 8.4.13
+- Laravel：Laravel Framework 10.50.2
+- Laravel Sanctum：ｖ3.3.3
+
+### データベース
+
+- MySQL：mysql Ver 8.4.9 for Linux on x86_64
+
+### その他
+
+- Tailwind CSS：tailwindcss@4.2.4
+- GitHub：git version 2.43.0
+- stripe決済
+- MailPit
+- ES Lint
+
+## ER図
+
+![alt text](image.png)
+
+## テーブル仕様
+
+### users テーブル
+
+| カラム名          | 型           | primary key | unique key | not null | foreign key |
+| ----------------- | ------------ | ----------- | ---------- | -------- | ----------- |
+| id                | bigint       | ◯           |            | ◯        |             |
+| name              | varchar(255) |             |            | ◯        |             |
+| email             | varchar(255) |             | ◯          | ◯        |             |
+| password          | varchar(255) |             |            | ◯        |             |
+| is_manager        | tinyint(1)   |             |            |          |             |
+| email_verified_at | timestamp    |             |            |          |             |
+| created_at        | timestamp    |             |            |          |             |
+| updated_at        | timestamp    |             |            |          |             |
+
+### events テーブル
+
+| カラム名           | 型           | primary key | unique key | not null | foreign key |
+| ------------------ | ------------ | ----------- | ---------- | -------- | ----------- |
+| id                 | bigint       | ◯           |            | ◯        |             |
+| title              | varchar(255) |             |            | ◯        |             |
+| capacity           | bigint       |             |            | ◯        |             |
+| lesson_img1        | varchar(255) |             |            | ◯        |             |
+| lesson_img2        | varchar(255) |             |            |          |             |
+| lesson_img3        | varchar(255) |             |            |          |             |
+| catch_copy         | varchar(255) |             |            | ◯        |             |
+| instructor_name    | varchar(255) |             |            | ◯        |             |
+| instructor_img     | varchar(255) |             |            |          |             |
+| instructor_profile | text         |             |            |          |             |
+| price              | unsigned int |             |            | ◯        |             |
+| created_at         | timestamp    |             |            |          |             |
+| updated_at         | timestamp    |             |            |          |             |
+
+### schedulesテーブル
+
+| カラム名   | 型        | primary key | unique key | not null | foreign key |
+| ---------- | --------- | ----------- | ---------- | -------- | ----------- |
+| id         | bigint    | ◯           |            | ◯        |             |
+| event_id   | bigint    |             |            | ◯        | event(id)   |
+| start_at   | datetime  |             |            | ◯        |             |
+| finish_at  | datetime  |             |            | ◯        |             |
+| created_at | timestamp |             |            |          |             |
+| updated_at | timestamp |             |            |          |             |
+
+### reservationsテーブル
+
+| カラム名           | 型           | primary key | unique key | not null | foreign key         |
+| ------------------ | ------------ | ----------- | ---------- | -------- | ------------------- |
+| id                 | bigint       | ◯           |            | ◯        |                     |
+| user_id            | bigint       |             |            | ◯        | user(id)            |
+| schedule_id        | bigint       |             |            | ◯        | schedule(id)        |
+| contact_number     | varchar(255) |             |            | ◯        |                     |
+| participants       | unsigned int |             |            | ◯        |                     |
+| amount             | unsigned int |             |            | ◯        |                     |
+| payment_status     | varchar(255) |             |            | ◯        |                     |
+| payment_methods_id | bigint       |             |            | ◯        | payment_methods(id) |
+| payment_updated_by | bigint       |             |            |          | user(id)            |
+| paid_at            | datetime     |             |            |          |                     |
+| created_at         | timestamp    |             |            |          |                     |
+| updated_at         | timestamp    |             |            |          |                     |
+
+### payment_methodsテーブル
+
+| カラム名       | 型           | primary key | unique key | not null | foreign key |
+| -------------- | ------------ | ----------- | ---------- | -------- | ----------- |
+| id             | bigint       | ◯           |            | ◯        |             |
+| payment_method | varchar(255) |             |            | ◯        |             |
+| created_at     | timestamp    |             |            |          |             |
+| updated_at     | timestamp    |             |            |          |             |
+
+### contact_statusesテーブル
+
+| カラム名   | 型           | primary key | unique key | not null | foreign key |
+| ---------- | ------------ | ----------- | ---------- | -------- | ----------- |
+| id         | bigint       | ◯           |            | ◯        |             |
+| status     | varchar(255) |             |            | ◯        |             |
+| created_at | timestamp    |             |            |          |             |
+| updated_at | timestamp    |             |            |          |             |
+
+## URL
+
+- ログイン：http://localhost:3000/login
+- phpMyAdmin：http://localhost:8080/
+- MailPit：http://localhost:8025/
