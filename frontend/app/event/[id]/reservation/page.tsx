@@ -1,50 +1,19 @@
-// import EventReserveForm from "@/app/event/[id]/reservation/components/EventReserveForm";
 import EventReserveForm from "./components/EventReserveForm";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
-
-export interface Schedule {
-    id: number;
-    event_id: number;
-    start_at: string;
-    finish_at: string;
-    event: {
-        id: number;
-        title: string;
-        capacity: number;
-        lesson_img1: string;
-        lesson_img2: string;
-        lesson_img3: string;
-        catch_copy: string;
-        instructor_name: string;
-        instructor_img: string;
-        instructor_profile: string;
-        price: number;
-    };
-}
+import { cookies } from "next/headers";
+import { PaymentMethod, ReservationErrors, Schedule } from "./types";
 
 export interface EventReserveResponse {
     schedule: Schedule;
     paymentMethods: PaymentMethod[];
     remainingCapacity: number;
-    errors?: {
-        payment_method_id?: string;
-        participants?: string;
-    };
-}
-
-export interface PaymentMethod {
-    id: number;
-    payment_method: string;
+    errors?: ReservationErrors;
 }
 
 interface Props {
     params: Promise<{ id: string }>;
-    searchParams: Promise<{
-        participants?: string;
-        payment_method_id?: string;
-    }>;
 }
 
 async function getEventReserve(id: string): Promise<EventReserveResponse> {
@@ -53,6 +22,12 @@ async function getEventReserve(id: string): Promise<EventReserveResponse> {
     if (!session?.accessToken) {
         redirect("/login");
     }
+
+    const cookieStore = await cookies();
+
+    const errorCookie = cookieStore.get("reservation_errors")?.value;
+
+    const errors = errorCookie ? JSON.parse(errorCookie) : undefined;
 
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/event/${id}/reservation`;
 
@@ -71,7 +46,12 @@ async function getEventReserve(id: string): Promise<EventReserveResponse> {
         throw new Error("予約入力欄が取得できませんでした");
     }
 
-    return res.json();
+    const data = await res.json();
+
+    return {
+        ...data,
+        errors,
+    };
 }
 
 export default async function EventReservePage({ params }: Props) {

@@ -21,8 +21,6 @@ export default function RegisterPage() {
         setErrors({});
         setIsLoading(true);
 
-        const callbackUrl = "/reservation/list";
-
         try {
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/register`,
@@ -55,22 +53,22 @@ export default function RegisterPage() {
                 return;
             }
 
+            // 登録後ログイン
             const result = await signIn("credentials", {
                 email,
                 password,
                 redirect: false,
-                callbackUrl,
             });
 
             if (result?.error) {
                 setErrors({
-                    email: ["登録は完了しましたが、ログインに失敗しました"],
+                    email: ["ログインに失敗しました"],
                 });
                 return;
             }
 
-            router.push(result?.url ?? callbackUrl);
-            router.refresh();
+            // メール認証待ち画面へ
+            router.push("/email/verify-notice");
         } catch (error) {
             setErrors({
                 email: ["通信エラーが発生しました"],

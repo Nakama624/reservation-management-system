@@ -2,20 +2,19 @@
 
 import { useState } from "react";
 import LinkButton from "@/components/LinkButton";
+import { PaymentMethod, ReservationErrors, Schedule } from "../types";
 
-import type {
-    Schedule,
-    PaymentMethod,
-} from "@/app/event/[id]/reservation/page";
+interface Errors {
+    payment_method_id?: string[];
+    participants?: string[];
+    contact_number?: string[];
+}
 
 interface Props {
     schedule: Schedule;
     paymentMethods: PaymentMethod[];
     remainingCapacity: number;
-    errors?: {
-        payment_method_id?: string;
-        participants?: string;
-    };
+    errors?: Errors;
 }
 
 export default function EventReserveForm({
@@ -25,7 +24,7 @@ export default function EventReserveForm({
     errors,
 }: Props) {
     const [participants, setParticipants] = useState(1);
-
+    const [contactNumber, setContactNumber] = useState("");
     const totalPrice = schedule.event.price * participants;
 
     return (
@@ -33,8 +32,8 @@ export default function EventReserveForm({
             <h1 className="text-3xl font-bold text-center">ご予約</h1>
 
             <form
-                action={`/event/${schedule.id}/reservation/confirm`}
-                method="get"
+                action={`/api/event/${schedule.id}/reservation/confirm`}
+                method="post"
             >
                 <table className="w-full my-12 border border-gray-300 border-collapse">
                     <tbody>
@@ -68,7 +67,7 @@ export default function EventReserveForm({
                                 <input
                                     type="number"
                                     name="participants"
-                                    min={1}
+                                    min="1"
                                     max={remainingCapacity}
                                     value={participants}
                                     onChange={(e) =>
@@ -78,11 +77,30 @@ export default function EventReserveForm({
                                 />
 
                                 <div className="text-sm text-red-500">
-                                    {errors?.participants}
+                                    {errors?.participants?.[0]}
                                 </div>
 
                                 <div className="text-sm text-red-500">
                                     残り{remainingCapacity}人
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr className="text-xl h-16">
+                            <th>ご連絡先</th>
+                            <td>
+                                <input
+                                    type="tel"
+                                    name="contact_number"
+                                    value={contactNumber}
+                                    onChange={(e) =>
+                                        setContactNumber(e.target.value)
+                                    }
+                                    className="border p-2 h-8 text-sm w-60"
+                                />
+
+                                <div className="text-sm text-red-500">
+                                    {errors?.contact_number?.[0]}
                                 </div>
                             </td>
                         </tr>
@@ -107,7 +125,7 @@ export default function EventReserveForm({
                                 </select>
 
                                 <div className="text-sm text-red-500">
-                                    {errors?.payment_method_id}
+                                    {errors?.payment_method_id?.[0]}
                                 </div>
                             </td>
                         </tr>
@@ -124,7 +142,7 @@ export default function EventReserveForm({
                         type="submit"
                         className="bg-blue-500 text-white px-4 py-2 rounded"
                     >
-                        予約する
+                        確認画面へ
                     </button>
                 </div>
                 <div className="flex justify-center">

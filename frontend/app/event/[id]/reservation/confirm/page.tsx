@@ -1,177 +1,53 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-interface Schedule {
-    id: number;
-    event_id: number;
-    start_at: string;
-    finish_at: string;
-    event: {
-        id: number;
-        title: string;
-        capacity: number;
-        lesson_img1: string;
-        lesson_img2: string;
-        lesson_img3: string;
-        catch_copy: string;
-        instructor_name: string;
-        instructor_img: string;
-        instructor_profile: string;
-        price: number;
-    };
-}
-
-export interface PaymentMethod {
-    id: number;
-    payment_method: string;
-}
-
-interface EventReserveResponse {
-    schedule: Schedule;
-    paymentMethods: PaymentMethod[];
-    remainingCapacity: number;
-}
-
 interface Props {
-    params: Promise<{
-        id: string;
-    }>;
-    searchParams: Promise<{
-        participants?: string;
-        payment_method_id?: string;
-    }>;
+    params: Promise<{ id: string }>;
 }
 
-async function getEventReserve(id: string): Promise<EventReserveResponse> {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.accessToken) {
-        redirect("/login");
-    }
-
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/event/${id}/reservation`;
-
-    const res = await fetch(url, {
-        cache: "no-store",
-        headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
-        },
-    });
-
-    if (res.status === 401) {
-        redirect("/login");
-    }
-
-    if (!res.ok) {
-        throw new Error("予約情報が取得できませんでした");
-    }
-
-    return res.json();
-}
-
-export default async function EventReserveConfirmPage({
-    params,
-    searchParams,
-}: Props) {
+export default async function EventReserveConfirmPage({ params }: Props) {
     const { id } = await params;
-    const { participants, payment_method_id } = await searchParams;
 
-    const { schedule, paymentMethods } = await getEventReserve(id);
+    const cookieStore = await cookies();
 
-    const reserveParticipants = Number(participants ?? 1);
-    const paymentMethodId = Number(payment_method_id);
+    const saved = cookieStore.get("reservation_confirm")?.value;
 
-    const paymentMethod = paymentMethods.find(
-        (method) => method.id === paymentMethodId,
-    );
-
-    if (!paymentMethod) {
-        throw new Error("支払方法が見つかりませんでした");
+    if (!saved) {
+        redirect(`/event/${id}/reservation`);
     }
 
-    const totalPrice = schedule.event.price * reserveParticipants;
+    const data = JSON.parse(saved);
+
+    const { schedule, reserve, paymentMethod } = data;
 
     return (
-        <div className="w-[700px] mx-auto mt-20">
-            <h1 className="text-3xl font-bold text-center">ご予約確認</h1>
+        <div className="mx-auto w-full max-w-5xl px-6 sm:px-8">
+            <h1 className="text-3xl mb-4 font-bold text-gray-500 text-center">
+                予約確認
+            </h1>
 
-            <form
-                action={`/event/${schedule.id}/reservation/complete`}
-                method="post"
-            >
-                <table className="w-full my-12 border border-gray-300 border-collapse">
-                    <tbody>
-                        <tr className="text-xl h-16">
-                            <th>イベント名</th>
-                            <td>{schedule.event.title}</td>
-                        </tr>
-
-                        <tr className="text-xl h-16">
-                            <th>開催日</th>
-                            <td>
-                                {new Date(schedule.start_at).toLocaleString(
-                                    "ja-JP",
-                                )}
-                            </td>
-                        </tr>
-
-                        <tr className="text-xl h-16">
-                            <th>講師名</th>
-                            <td>{schedule.event.instructor_name}</td>
-                        </tr>
-
-                        <tr className="text-xl h-16">
-                            <th>金額</th>
-                            <td>¥{schedule.event.price.toLocaleString()}</td>
-                        </tr>
-
-                        <tr className="text-xl h-16">
-                            <th>参加人数</th>
-                            <td>
-                                <input
-                                    type="number"
-                                    value={reserveParticipants}
-                                    name="participants"
-                                    readOnly
-                                />
-                            </td>
-                        </tr>
-
-                        <tr className="text-xl h-16">
-                            <th>支払方法</th>
-                            <td>
-                                <input
-                                    type="text"
-                                    value={paymentMethod.payment_method}
-                                    readOnly
-                                />
-
-                                <input
-                                    type="hidden"
-                                    name="payment_method_id"
-                                    value={paymentMethod.id}
-                                />
-                            </td>
-                        </tr>
-
-                        <tr className="text-xl h-16">
-                            <th>合計金額</th>
-                            <td>¥{totalPrice.toLocaleString()}</td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div className="flex justify-center">
+            <div className="border p-4">
+                <p>イベント名：{schedule.event.title}</p>
+                <p>参加人数：{reserve.participants}</p>
+                <p>電話番号：{reserve.contact_number}</p>
+                <p>支払方法：{paymentMethod.payment_method}</p>
+                <p>
+                    合計金額：
+                    {schedule.event.price * reserve.participants}円
+                </p>
+                <form
+                    action={`/api/event/${id}/reservation/complete`}
+                    method="post"
+                    className="flex justify-center mt-6"
+                >
                     <button
                         type="submit"
                         className="bg-blue-500 text-white px-4 py-2 rounded"
                     >
-                        確定
+                        予約を確定する
                     </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     );
 }

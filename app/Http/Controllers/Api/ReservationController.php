@@ -83,10 +83,13 @@ class ReservationController extends Controller
 
         $reserve = $request->only([
             'participants',
-            'payment_method_id'
+            'contact_number',
+            'payment_method_id',
         ]);
 
-        $paymentMethod = PaymentMethod::findOrFail($reserve['payment_method_id']);
+        $paymentMethod = PaymentMethod::findOrFail(
+            $reserve['payment_method_id']
+        );
 
         return response()->json([
             'schedule' => $schedule,
@@ -95,25 +98,26 @@ class ReservationController extends Controller
         ]);
     }
 
-    // 予約確定
-    public function store(Request $request, $schedule_id){
+    public function complete(ReservationRequest $request, $schedule_id)
+    {
         $user = auth()->user();
+
         $schedule = Schedule::with('event')->findOrFail($schedule_id);
 
-        Reservation::create([
-            'user_id' => 'user_id', $user->id,
+        $reservation = Reservation::create([
+            'user_id' => $user->id,
             'schedule_id' => $schedule->id,
             'participants' => $request->participants,
+            'contact_number' => $request->contact_number,
             'amount' => $schedule->event->price * $request->participants,
-            'payment_status' => "未払い",
+            'payment_status' => '未払い',
             'payment_method_id' => $request->payment_method_id,
         ]);
 
         return response()->json([
-            'schedule' => $schedule,
+            'reservation' => $reservation,
         ]);
     }
-
     // お支払が未払いの場合のみ一覧からキャンセルが可能
     public function canceled($reservation_id, Request $request){
         $canceledReservation = Reservation::where('id', $reservation_id)
