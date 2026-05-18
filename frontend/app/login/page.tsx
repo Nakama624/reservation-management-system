@@ -65,14 +65,15 @@ export default function LoginPage() {
                 return;
             }
 
-            const session = await getSession();
+            const updatedSession = await getSession();
 
-            if (session?.user?.isManager) {
+            if (!updatedSession?.user?.emailVerifiedAt) {
+                router.push("/email/verify-notice");
+            } else if (updatedSession.user.isManager) {
                 router.push("/admin/event/list");
             } else {
                 router.push("/reservation/list");
             }
-
             router.refresh();
         } catch (error) {
             setErrors({
@@ -151,6 +152,7 @@ export default function LoginPage() {
                 <p className="mt-4 text-sm text-gray-600">
                     管理者: admin@example.com / password
                 </p>
+
                 <p className="mt-4 text-sm text-gray-600">
                     一般: user@example.com / password
                 </p>

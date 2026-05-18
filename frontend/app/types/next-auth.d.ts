@@ -9,12 +9,14 @@ declare module "next-auth" {
             email?: string | null;
             image?: string | null;
             isManager: boolean;
+            emailVerifiedAt: string | null;
         };
     }
 
     interface User {
         accessToken: string;
         isManager: boolean;
+        emailVerifiedAt: string | null;
     }
 }
 
@@ -23,5 +25,6 @@ declare module "next-auth/jwt" {
         accessToken: string;
         id: string;
         isManager: boolean;
+        emailVerifiedAt: string | null;
     }
 }

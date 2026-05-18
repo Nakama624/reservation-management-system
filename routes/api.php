@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\StripeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,8 +39,18 @@ Route::get('/event/{schedule_id}', [EventController::class, 'eventDetail']);
 
 
 
+// メール認証画面へ
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware('signed')
+    ->name('verification.verify');
+
+Route::post('/email/verification-notification', [AuthController::class, 'resendVerificationEmail'])
+    ->middleware(['auth:sanctum', 'throttle:6,1']);
+
+
+
 // 認証済みユーザーのみアクセス可能なルート
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     // 管理者
     // イベント一覧（すべて表示）
@@ -56,9 +67,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/reservation/list', [ReservationController::class, 'reservationList']);
     // 予約入力へ
     Route::get('/event/{schedule_id}/reservation', [ReservationController::class, 'reserveIndex']);
-    // 予約確認・完了へ(入力値は検索と同じようにパラメータで保持するためGet)
-    Route::get('/event/{schedule_id}/reservation/confirm', [ReservationController::class, 'confirm']);
-    Route::post('/event/{schedule_id}/reservation/complete', [ReservationController::class, 'store']);
+    // 予約確認(入力値は検索と同じようにパラメータで保持するためGet)
+    Route::post('/event/{schedule_id}/reservation/confirm', [ReservationController::class, 'confirm']);
+    // Stripe決済
+    Route::post('/event/{schedule_id}/reservation/stripe', [StripeController::class, 'checkout']);
+    Route::post('/reservation/payment-success',[StripeController::class, 'paymentSuccess']);
+    // 予約完了
+    Route::post('/event/{schedule_id}/reservation/complete', [ReservationController::class, 'complete']);
     // 予約キャンセル
     Route::patch('/reservation/{reservation_id}/canceled', [ReservationController::class, 'canceled']);
     // 予約詳細
@@ -72,9 +87,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/contact/confirm', [ContactController::class, 'confirm']);
     // お問い合わせ完了
     Route::post('/contact/complete', [ContactController::class, 'complete']);
+});
 
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
         return $request->user();
     });
+
     Route::post('/logout', [AuthController::class, 'logout']);
 });

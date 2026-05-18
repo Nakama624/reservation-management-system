@@ -37,6 +37,7 @@ export const authOptions: NextAuthOptions = {
                     email: data.user.email,
                     isManager: Boolean(data.user.is_manager),
                     accessToken: data.token,
+                    emailVerifiedAt: data.user.email_verified_at,
                 };
             },
         }),
@@ -47,14 +48,19 @@ export const authOptions: NextAuthOptions = {
                 token.accessToken = user.accessToken;
                 token.id = user.id;
                 token.isManager = user.isManager;
+                token.emailVerifiedAt = user.emailVerifiedAt;
             }
 
             return token;
         },
+
         async session({ session, token }) {
             session.accessToken = token.accessToken as string;
             session.user.id = token.id as string;
             session.user.isManager = token.isManager as boolean;
+            session.user.emailVerifiedAt = token.emailVerifiedAt as
+                | string
+                | null;
 
             return session;
         },

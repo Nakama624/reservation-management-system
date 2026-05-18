@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
 
 export async function POST(request: Request) {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.accessToken) {
+        redirect("/login");
+    }
+    
     const formData = await request.formData();
 
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/contact/complete`;
